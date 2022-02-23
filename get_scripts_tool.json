@@ -1,0 +1,100 @@
+{
+    "experiments": {
+        "details": {
+            "title": "get scripts",
+            "description": "Fetch one or multiple Scripts from CaaS and make them available before an experiment startsbrTo run this sample prepare 2 scripts helloworld1, helloworld2 with content:brcode#!/bin/sh echo 'Hello World'/codebrradd the script names to span class='badge badge-info'load_scripts [ ]/span to the span class='badge badge-secondary'configSpec/span.",
+            "version": "0.0.1",
+            "documentation": "",
+            "tags": "tool, resource",
+            "contributions": {
+                "tooling": "high"
+            }
+        },
+        "secretsSpec": {},
+        "controlSpec": [
+            {
+                "name": "get scripts",
+                "provider": {
+                    "type": "python",
+                    "module": "chaos_utils.get_scripts.controls"
+                }
+            }
+        ],
+        "configurationSpec": {
+            "load_scripts": [
+                "helloworld1",
+                "helloworld2"
+            ],
+            "hypothesis": {
+                "strategy": "before-method-only"
+            },
+            "rollback-strategy": "always"
+        },
+        "steadyStateSpec": {
+            "title": "scripts have been loaded",
+            "probes": [
+                {
+                    "name": "show installed scripts",
+                    "type": "probe",
+                    "tolerance": 0,
+                    "timeout": 60,
+                    "background": false,
+                    "provider": {
+                        "type": "process",
+                        "path": "/bin/sh",
+                        "arguments": "-c 'ls -al ./'"
+                    }
+                },
+                {
+                    "name": "helloworld1 is available",
+                    "type": "probe",
+                    "tolerance": 0,
+                    "timeout": 60,
+                    "background": false,
+                    "provider": {
+                        "type": "process",
+                        "path": "/bin/sh",
+                        "arguments": "-c 'ls -al ./helloworld1.other'"
+                    }
+                },
+                {
+                    "name": "helloworld2 is available",
+                    "type": "probe",
+                    "tolerance": 0,
+                    "timeout": 60,
+                    "background": false,
+                    "provider": {
+                        "type": "process",
+                        "path": "/bin/sh",
+                        "arguments": "-c 'ls -al ./helloworld2.other'"
+                    }
+                }
+            ]
+        },
+        "methodSpec": [
+            {
+                "name": "execute helloworld1",
+                "type": "probe",
+                "timeout": 60,
+                "background": false,
+                "provider": {
+                    "type": "process",
+                    "path": "/bin/sh",
+                    "arguments": "-c './helloworld1.other'"
+                }
+            },
+            {
+                "name": "execute helloworld2",
+                "type": "probe",
+                "timeout": 60,
+                "background": false,
+                "provider": {
+                    "type": "process",
+                    "path": "/bin/sh",
+                    "arguments": "-c './helloworld2.other'"
+                }
+            }
+        ],
+        "rollbackSpec": []
+    }
+}
