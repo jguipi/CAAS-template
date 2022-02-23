@@ -1,0 +1,90 @@
+{
+    "experiments": {
+        "details": {
+            "title": "install additional applications",
+            "description": "Install additional os applications to be available before an experiment startsbradd span class='badge badge-info'application_list/span to the iconfigSpec/i.",
+            "version": "0.0.1",
+            "documentation": "",
+            "tags": "tool, resource",
+            "contributions": {
+                "tooling": "high"
+            }
+        },
+        "secretsSpec": {},
+        "controlSpec": [
+            {
+                "name": "install additional apps",
+                "provider": {
+                    "type": "python",
+                    "module": "chaos_utils.additional_apps.controls"
+                }
+            }
+        ],
+        "configurationSpec": {
+            "application_list": [
+                "curl",
+                "jq",
+                "kubectl"
+            ],
+            "hypothesis": {
+                "strategy": "before-method-only"
+            },
+            "rollback-strategy": "always"
+        },
+        "steadyStateSpec": {
+            "title": "applications have been installed",
+            "probes": [
+                {
+                    "name": "curl is available",
+                    "type": "probe",
+                    "tolerance": 0,
+                    "timeout": 60,
+                    "background": false,
+                    "provider": {
+                        "type": "process",
+                        "path": "/bin/sh",
+                        "arguments": "-c 'curl --help'"
+                    }
+                },
+                {
+                    "name": "jq is available",
+                    "type": "probe",
+                    "tolerance": 0,
+                    "timeout": 60,
+                    "background": false,
+                    "provider": {
+                        "type": "process",
+                        "path": "/bin/sh",
+                        "arguments": "-c 'jq --help'"
+                    }
+                },
+                {
+                    "name": "kubectl is available",
+                    "type": "probe",
+                    "tolerance": 0,
+                    "timeout": 60,
+                    "background": false,
+                    "provider": {
+                        "type": "process",
+                        "path": "/bin/sh",
+                        "arguments": "-c 'kubectl --help'"
+                    }
+                }
+            ]
+        },
+        "methodSpec": [
+            {
+                "name": "execute kubectl together with jq",
+                "type": "probe",
+                "timeout": 60,
+                "background": false,
+                "provider": {
+                    "type": "process",
+                    "path": "/bin/sh",
+                    "arguments": "-c 'kubectl get ns -ojson | jq -r'"
+                }
+            }
+        ],
+        "rollbackSpec": []
+    }
+}
