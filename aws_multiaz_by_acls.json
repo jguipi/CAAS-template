@@ -1,0 +1,110 @@
+{
+    "experiments": {
+        "details": {
+            "title": "multiaz zone failure on AWS",
+            "description": "simulate a multi az failover. Can be triggered from another region, another cluster, but same aws account.",
+            "version": "0.0.4",
+            "documentation": "Chaos-Engineering-Concepts/AWS_MultiAZ_Failure/",
+            "tags": [
+                "multiaz",
+                "node"
+            ],
+            "contributions": {
+                "resources": "high",
+                "memory": "none",
+                "cpu": "none",
+                "filesystem": "none",
+                "disk I/O": "none",
+                "inode": "none",
+                "processes": "none",
+                "container": "none",
+                "vm": "none",
+                "pod": "none",
+                "node": "high",
+                "network": "none",
+                "routing": "none",
+                "latency": "none",
+                "bandwidth": "none",
+                "corrupt packages": "none",
+                "lost packages": "none",
+                "dns": "none",
+                "certificates": "none",
+                "self-healing": "high",
+                "reliability": "none",
+                "resilience": "high",
+                "security": "none",
+                "tooling": "none"
+            }
+        },
+        "secretsSpec": {
+            "aws": {
+                "aws_access_key_id": "",
+                "aws_secret_access_key": ""
+            }
+        },
+        "controlSpec": [],
+        "configurationSpec": {
+            "aws_region": "",
+            "aws_az_id": "",
+            "vpc_id": "vpc-id",
+            "hypothesis": {
+                "strategy": "default"
+            },
+            "rollback-strategy": "always"
+        },
+        "steadyStateSpec": {
+            "title": "everything-is-ok",
+            "probes": [
+                {
+                    "name": "httpAccessible",
+                    "type": "probe",
+                    "tolerance": 200,
+                    "background": false,
+                    "expected_status": 200,
+                    "provider": {
+                        "type": "http",
+                        "timeout": 60,
+                        "verify_tls": false,
+                        "url": "application-url"
+                    },
+                    "pauses": {
+                        "after": 5
+                    }
+                }
+            ]
+        },
+        "methodSpec": [
+            {
+                "name": "az failover",
+                "type": "action",
+                "provider": {
+                    "type": "python",
+                    "module": "chaosaws_extensions.az.actions",
+                    "func": "network_acl_association",
+                    "arguments": {
+                        "vpc_id": "${vpc_id}",
+                        "az_id": "${aws_az_id}"
+                    }
+                },
+                "pauses": {
+                    "after": 600
+                }
+            }
+        ],
+        "rollbackSpec": [
+            {
+                "name": "cleanup network_acl_association",
+                "type": "action",
+                "provider": {
+                    "type": "python",
+                    "module": "chaosaws_extensions.az.actions",
+                    "func": "cleanup_network_acl_association",
+                    "arguments": {
+                        "vpc_id": "${vpc_id}",
+                        "az_id": "${aws_az_id}"
+                    }
+                }
+            }
+        ]
+    }
+}
